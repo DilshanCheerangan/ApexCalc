@@ -281,6 +281,7 @@ body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg-gradient);
   color: var(--text-main);
+  min-height: 100dvh;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   display: flex;
@@ -359,6 +360,7 @@ html {
 .app-container {
   width: 100%;
   max-width: 420px;
+  height: 100dvh;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -367,7 +369,7 @@ html {
 }
 
 /* Smooth scaling on desktop screens */
-@media (min-width: 480px) {
+@media (min-width: 480px) and (min-height: 800px) {
   .app-container {
     height: 820px;
     border-radius: 40px;
@@ -471,6 +473,10 @@ html {
    ========================================================================== */
 .calc-display-wrapper {
   padding: 8px 24px 16px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .calc-display {
@@ -482,7 +488,8 @@ html {
   flex-direction: column;
   justify-content: flex-end;
   text-align: right;
-  min-height: 150px;
+  min-height: 120px;
+  flex: 1;
   transition: all var(--transition-speed) ease;
   position: relative;
   overflow: hidden;
@@ -608,10 +615,12 @@ html {
    KEYPAD CONTAINER & GRID
    ========================================================================== */
 .keyboard-container {
-  flex: 1;
   padding: 0 24px 24px 24px;
   position: relative;
   display: flex;
+  height: 440px;
+  max-height: 52vh;
+  min-height: 280px;
   overflow: hidden;
 }
 
@@ -1034,22 +1043,36 @@ html {
    SCALING FOR SMALL PHONES
    ========================================================================== */
 @media (max-height: 670px) {
+  .calc-display-wrapper {
+    padding: 4px 16px 8px 16px;
+  }
   .calc-display {
-    min-height: 120px;
-    padding: 14px 18px;
+    min-height: 90px;
+    padding: 12px 16px;
   }
   .value-line {
-    font-size: 2.25rem;
+    font-size: 2.0rem;
   }
   .btn {
-    font-size: 1.25rem;
-    border-radius: 14px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+  }
+  .keyboard-container {
+    height: 320px;
+    max-height: 55vh;
+    padding: 0 16px 16px 16px;
   }
   .keyboard-grid {
     grid-gap: 8px;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
   }
   .mode-tabs {
-    margin-bottom: 12px;
+    margin: 0 16px 8px 16px;
+  }
+  .calc-header {
+    padding: 12px 16px 4px 16px;
   }
 }
 

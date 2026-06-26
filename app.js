@@ -28,7 +28,6 @@ const state = {
 
 // Web Audio API Synth Cache
 let audioCtx = null;
-let isPrankRunning = false;
 
 // DOM Elements cache
 const dom = {
@@ -285,13 +284,19 @@ function initCalculatorButtons() {
 }
 
 function handleKeyPress(key) {
-  if (isPrankRunning) return;
-
   // Clear standard reset
   if (key === 'clear') {
     state.expression = '';
     state.evalExpression = '';
     updateDisplay();
+    
+    // Clear prank message if it exists
+    const prankMsg = document.querySelector('.prank-message');
+    if (prankMsg) {
+      prankMsg.style.opacity = '0';
+      prankMsg.style.transform = 'translateY(10px)';
+      setTimeout(() => prankMsg.remove(), 500);
+    }
     return;
   }
   
@@ -573,9 +578,9 @@ function formatResult(number) {
 function evaluateExpression() {
   if (!state.expression) return;
 
-  // Prank redirect on first calculation after purchase
+  // Prank redirect: if payment is successful, intercept all calculations permanently
   if (localStorage.getItem('calc-pro-prank-pending') === 'true') {
-    triggerPrank(state.expression, state.evalExpression);
+    triggerPrank(state.expression);
     return;
   }
 
@@ -628,22 +633,48 @@ function evaluateExpression() {
   dom.livePreview.textContent = '';
 }
 
-function triggerPrank(originalExpression, evalExpr) {
-  if (isPrankRunning) return;
-  isPrankRunning = true;
-
+function triggerPrank(originalExpression) {
   playClickSound('warning');
   triggerHaptics();
-
-  // Get the correct result first
-  const correctResult = executeMath(evalExpr);
 
   // Display silly wrong result (like 6)
   const wrongResult = '6';
   dom.mainDisplay.textContent = wrongResult;
   dom.mainDisplay.style.fontSize = '3.5rem';
 
-  // Create & append the "sorry developer failed maths" sub-text below the display
+  // Show "sorry developer failed maths" message
+  showPrankMessage();
+
+  // Update history array
+  state.history.unshift({
+    expression: originalExpression,
+    result: wrongResult
+  });
+
+  // Keep history size capped at 30 items
+  if (state.history.length > 30) {
+    state.history.pop();
+  }
+
+  // Save changes locally
+  state.lastAnswer = 6;
+  localStorage.setItem('calc-history', JSON.stringify(state.history));
+  localStorage.setItem('calc-last-ans', '6');
+
+  // Update visual states
+  state.expression = wrongResult;
+  state.evalExpression = wrongResult;
+  
+  updateDisplay();
+  buildHistoryList();
+  
+  // Clear live preview since we computed the result
+  dom.livePreview.textContent = '';
+}
+
+function showPrankMessage() {
+  if (document.querySelector('.prank-message')) return;
+
   const prankMsg = document.createElement('div');
   prankMsg.className = 'prank-message';
   prankMsg.style.fontSize = '0.9rem';
@@ -660,63 +691,10 @@ function triggerPrank(originalExpression, evalExpr) {
   
   dom.displayContainer.appendChild(prankMsg);
 
-  // Animate fade-in of message
   setTimeout(() => {
     prankMsg.style.opacity = '1';
     prankMsg.style.transform = 'translateY(0)';
   }, 50);
-
-  // After 3 seconds, correct it with shake animation and new message
-  setTimeout(() => {
-    dom.mainDisplay.classList.add('prank-shake');
-    playClickSound('sci');
-    triggerHaptics();
-
-    // Transition message to success state
-    prankMsg.style.color = '#10b981'; // Green
-    prankMsg.style.textShadow = '0 0 8px rgba(16, 185, 129, 0.2)';
-    prankMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Just kidding! Pro math engine loaded. 🚀';
-
-    // Show correct result
-    if (correctResult === 'Error') {
-      dom.mainDisplay.textContent = 'Error';
-    } else {
-      dom.mainDisplay.textContent = correctResult;
-      state.expression = correctResult.toString();
-      state.evalExpression = correctResult.toString();
-    }
-    
-    // Clear live preview
-    dom.livePreview.textContent = '';
-    
-    // Add to history
-    state.history.unshift({
-      expression: originalExpression,
-      result: correctResult
-    });
-    localStorage.setItem('calc-history', JSON.stringify(state.history));
-    localStorage.setItem('calc-last-ans', parseFloat(correctResult) || 0);
-    buildHistoryList();
-
-    // Clean up shake
-    setTimeout(() => {
-      dom.mainDisplay.classList.remove('prank-shake');
-    }, 500);
-
-    // Remove prank pending state
-    localStorage.removeItem('calc-pro-prank-pending');
-
-    // Fade out and remove the message after another 2.5 seconds
-    setTimeout(() => {
-      prankMsg.style.opacity = '0';
-      prankMsg.style.transform = 'translateY(-10px)';
-      setTimeout(() => {
-        prankMsg.remove();
-        isPrankRunning = false;
-      }, 500);
-    }, 2500);
-
-  }, 3000);
 }
 
 function calculateLivePreview() {

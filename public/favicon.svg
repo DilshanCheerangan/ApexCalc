@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient: Deep premium violet to blue -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <!-- Glowing Accent Gradient -->
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded Base Card -->
+  <rect width="480" height="480" x="16" y="16" rx="100" fill="url(#bg-grad)" />
+  
+  <!-- Screen display of calculator -->
+  <rect width="320" height="90" x="96" y="90" rx="20" fill="#0f172a" opacity="0.9" />
+  <!-- Screen details (accent line) -->
+  <rect width="80" height="8" x="310" y="105" rx="4" fill="url(#accent-grad)" />
+  
+  <!-- Keys (grid of buttons) -->
+  <!-- Row 1 -->
+  <rect width="60" height="60" x="96" y="210" rx="15" fill="#ffffff" opacity="0.15" />
+  <rect width="60" height="60" x="182" y="210" rx="15" fill="#ffffff" opacity="0.15" />
+  <rect width="60" height="60" x="268" y="210" rx="15" fill="#ffffff" opacity="0.15" />
+  <rect width="60" height="60" x="354" y="210" rx="15" fill="url(#accent-grad)" />
+  
+  <!-- Row 2 -->
+  <rect width="60" height="60" x="96" y="296" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="182" y="296" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="268" y="296" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="354" y="296" rx="15" fill="url(#accent-grad)" />
+
+  <!-- Row 3 -->
+  <rect width="60" height="60" x="96" y="382" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="182" y="382" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="268" y="382" rx="15" fill="#ffffff" opacity="0.25" />
+  <rect width="60" height="60" x="354" y="382" rx="15" fill="#f43f5e" />
+</svg>

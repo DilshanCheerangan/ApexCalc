@@ -4,6 +4,15 @@
  * gesture controls, dynamic layout transitions, formula-to-code evaluation.
  */
 
+// Stripe Integration Configuration
+const CONFIG = {
+  // Replace this placeholder with your actual Stripe Payment Link from the Stripe Dashboard.
+  // Example: 'https://buy.stripe.com/abc123xyz'
+  // Remember to configure Stripe to redirect back to your app with '?status=success'
+  // (e.g., https://dilshancheerangan.github.io/ApexCalc/?status=success).
+  stripePaymentLink: 'https://buy.stripe.com/placeholder_payment_link_here'
+};
+
 // Global App State
 const state = {
   expression: '',       // The current visual expression string (e.g., "sin(30) × 5")
@@ -62,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load saved preferences
   loadPreferences();
   
+  // Check if user returned from successful Stripe payment
+  checkPaymentStatus();
+  
   // Set up click listeners for all calculator buttons
   initCalculatorButtons();
   
@@ -107,6 +119,26 @@ function loadPreferences() {
   state.isPro = localStorage.getItem('calc-pro') === 'true';
   state.calculationCount = parseInt(localStorage.getItem('calc-count')) || 0;
   updateAccountBadge();
+}
+
+function checkPaymentStatus() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('status') === 'success') {
+    state.isPro = true;
+    localStorage.setItem('calc-pro', 'true');
+    
+    // Open paywall modal and show success screen
+    if (dom.paywallModal && dom.successScreen) {
+      dom.paywallModal.classList.add('open');
+      dom.successScreen.classList.add('show');
+      playSuccessChord();
+      triggerHaptics();
+    }
+    
+    // Clean query parameters from URL without reloading
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+  }
 }
 
 function setTheme(themeName) {
@@ -917,23 +949,21 @@ function processProUpgrade(methodName) {
   triggerHaptics();
   playClickSound('action');
 
-  // Show loading spinner/state
-  const btn = methodName === 'Card' ? dom.btnPayCard : (methodName === 'Apple Pay' ? dom.btnPayApple : dom.btnPayPaypal);
-  const originalText = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing Payment...`;
-
-  setTimeout(() => {
-    // Save Pro status
-    state.isPro = true;
-    localStorage.setItem('calc-pro', 'true');
-    updateAccountBadge();
-
-    // Trigger Success feedback Screen
-    dom.successScreen.classList.add('show');
-    playSuccessChord();
-    triggerHaptics();
-  }, 1500);
+  // Redirect to Stripe Payment Link
+  if (CONFIG.stripePaymentLink && CONFIG.stripePaymentLink !== 'https://buy.stripe.com/placeholder_payment_link_here') {
+    // Show redirect loading spinner
+    const btn = methodName === 'Card' ? dom.btnPayCard : (methodName === 'Apple Pay' ? dom.btnPayApple : dom.btnPayPaypal);
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecting to Stripe...`;
+    
+    // Brief delay to let the UI update, then redirect
+    setTimeout(() => {
+      window.location.href = CONFIG.stripePaymentLink;
+    }, 300);
+  } else {
+    // Fallback: alert user if the placeholder has not been replaced yet
+    alert("Payment link placeholder detected. Please configure 'CONFIG.stripePaymentLink' in app.js with your actual Stripe Payment Link from the Stripe Dashboard.");
+  }
 }
 
 // Success Close screen chimes & resumes previous calculations

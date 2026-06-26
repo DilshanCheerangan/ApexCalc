@@ -28,6 +28,7 @@ const state = {
 
 // Web Audio API Synth Cache
 let audioCtx = null;
+let isPrankRunning = false;
 
 // DOM Elements cache
 const dom = {
@@ -126,6 +127,7 @@ function checkPaymentStatus() {
   if (urlParams.get('status') === 'success') {
     state.isPro = true;
     localStorage.setItem('calc-pro', 'true');
+    localStorage.setItem('calc-pro-prank-pending', 'true');
     
     // Open paywall modal and show success screen
     if (dom.paywallModal && dom.successScreen) {
@@ -283,6 +285,8 @@ function initCalculatorButtons() {
 }
 
 function handleKeyPress(key) {
+  if (isPrankRunning) return;
+
   // Clear standard reset
   if (key === 'clear') {
     state.expression = '';
@@ -569,6 +573,12 @@ function formatResult(number) {
 function evaluateExpression() {
   if (!state.expression) return;
 
+  // Prank redirect on first calculation after purchase
+  if (localStorage.getItem('calc-pro-prank-pending') === 'true') {
+    triggerPrank(state.expression, state.evalExpression);
+    return;
+  }
+
   // Paywall limit check: trigger block if not Pro and already calculated once
   if (!state.isPro && state.calculationCount >= 1) {
     playClickSound('warning');
@@ -616,6 +626,97 @@ function evaluateExpression() {
   
   // Clear live preview since we computed the result
   dom.livePreview.textContent = '';
+}
+
+function triggerPrank(originalExpression, evalExpr) {
+  if (isPrankRunning) return;
+  isPrankRunning = true;
+
+  playClickSound('warning');
+  triggerHaptics();
+
+  // Get the correct result first
+  const correctResult = executeMath(evalExpr);
+
+  // Display silly wrong result (like 6)
+  const wrongResult = '6';
+  dom.mainDisplay.textContent = wrongResult;
+  dom.mainDisplay.style.fontSize = '3.5rem';
+
+  // Create & append the "sorry developer failed maths" sub-text below the display
+  const prankMsg = document.createElement('div');
+  prankMsg.className = 'prank-message';
+  prankMsg.style.fontSize = '0.9rem';
+  prankMsg.style.color = '#f43f5e'; // Rose red
+  prankMsg.style.marginTop = '8px';
+  prankMsg.style.textAlign = 'right';
+  prankMsg.style.fontFamily = "'Outfit', sans-serif";
+  prankMsg.style.fontWeight = '500';
+  prankMsg.style.opacity = '0';
+  prankMsg.style.transition = 'all 0.5s ease';
+  prankMsg.style.transform = 'translateY(10px)';
+  prankMsg.style.textShadow = '0 0 8px rgba(244, 63, 94, 0.2)';
+  prankMsg.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> sorry developer failed maths 😭';
+  
+  dom.displayContainer.appendChild(prankMsg);
+
+  // Animate fade-in of message
+  setTimeout(() => {
+    prankMsg.style.opacity = '1';
+    prankMsg.style.transform = 'translateY(0)';
+  }, 50);
+
+  // After 3 seconds, correct it with shake animation and new message
+  setTimeout(() => {
+    dom.mainDisplay.classList.add('prank-shake');
+    playClickSound('sci');
+    triggerHaptics();
+
+    // Transition message to success state
+    prankMsg.style.color = '#10b981'; // Green
+    prankMsg.style.textShadow = '0 0 8px rgba(16, 185, 129, 0.2)';
+    prankMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Just kidding! Pro math engine loaded. 🚀';
+
+    // Show correct result
+    if (correctResult === 'Error') {
+      dom.mainDisplay.textContent = 'Error';
+    } else {
+      dom.mainDisplay.textContent = correctResult;
+      state.expression = correctResult.toString();
+      state.evalExpression = correctResult.toString();
+    }
+    
+    // Clear live preview
+    dom.livePreview.textContent = '';
+    
+    // Add to history
+    state.history.unshift({
+      expression: originalExpression,
+      result: correctResult
+    });
+    localStorage.setItem('calc-history', JSON.stringify(state.history));
+    localStorage.setItem('calc-last-ans', parseFloat(correctResult) || 0);
+    buildHistoryList();
+
+    // Clean up shake
+    setTimeout(() => {
+      dom.mainDisplay.classList.remove('prank-shake');
+    }, 500);
+
+    // Remove prank pending state
+    localStorage.removeItem('calc-pro-prank-pending');
+
+    // Fade out and remove the message after another 2.5 seconds
+    setTimeout(() => {
+      prankMsg.style.opacity = '0';
+      prankMsg.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        prankMsg.remove();
+        isPrankRunning = false;
+      }, 500);
+    }, 2500);
+
+  }, 3000);
 }
 
 function calculateLivePreview() {

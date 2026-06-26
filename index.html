@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ApexCalc</title>
+  
+  <!-- Google Fonts: Outfit for general UI, JetBrains Mono for display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for beautiful icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-aurora">
+  <!-- Decorative background elements for Glassmorphic background -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-container">
+    <div class="calculator-card">
+      
+      <!-- Top Navigation & Controls Bar -->
+      <header class="calc-header">
+        <div class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-calculator"></i></span>
+          <span class="logo-text">APEX<span class="premium-text">CALC</span></span>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-sound" class="action-btn" title="Toggle Sound Feedback" aria-label="Toggle sound feedback">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button id="btn-history" class="action-btn" title="View History" aria-label="View history">
+            <i class="fa-solid fa-history"></i>
+          </button>
+          <button id="btn-theme" class="action-btn" title="Change Theme" aria-label="Change theme">
+            <i class="fa-solid fa-palette"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Calculator Display Area -->
+      <section class="calc-display-wrapper">
+        <div class="calc-display" id="display-container">
+          <!-- Small expression display showing active formula -->
+          <div class="expression-line" id="expression-display"></div>
+          
+          <!-- Large display showing active output or input -->
+          <div class="value-line-container">
+            <span class="copy-tooltip" id="copy-tooltip">Copied!</span>
+            <div class="value-line" id="main-display">0</div>
+          </div>
+          
+          <!-- Live result preview before pressing equals -->
+          <div class="live-preview" id="live-preview-display"></div>
+        </div>
+      </section>
+
+      <!-- Mode Tabs (Standard vs Scientific) -->
+      <nav class="mode-tabs">
+        <button class="mode-tab active" data-mode="standard">Standard</button>
+        <button class="mode-tab" data-mode="scientific">Scientific</button>
+      </nav>
+
+      <!-- Keyboard Container -->
+      <main class="keyboard-container">
+        
+        <!-- Standard Keyboard Grid -->
+        <div class="keyboard-grid mode-active" id="keyboard-standard">
+          <!-- Row 1 -->
+          <button class="btn btn-action" data-key="clear">AC</button>
+          <button class="btn btn-action" data-key="backspace"><i class="fa-solid fa-delete-left"></i></button>
+          <button class="btn btn-action" data-key="percent">%</button>
+          <button class="btn btn-operator" data-key="/">÷</button>
+          
+          <!-- Row 2 -->
+          <button class="btn btn-num" data-key="7">7</button>
+          <button class="btn btn-num" data-key="8">8</button>
+          <button class="btn btn-num" data-key="9">9</button>
+          <button class="btn btn-operator" data-key="*">×</button>
+          
+          <!-- Row 3 -->
+          <button class="btn btn-num" data-key="4">4</button>
+          <button class="btn btn-num" data-key="5">5</button>
+          <button class="btn btn-num" data-key="6">6</button>
+          <button class="btn btn-operator" data-key="-">−</button>
+          
+          <!-- Row 4 -->
+          <button class="btn btn-num" data-key="1">1</button>
+          <button class="btn btn-num" data-key="2">2</button>
+          <button class="btn btn-num" data-key="3">3</button>
+          <button class="btn btn-operator" data-key="+">+</button>
+          
+          <!-- Row 5 -->
+          <button class="btn btn-num btn-double" data-key="0">0</button>
+          <button class="btn btn-num" data-key=".">.</button>
+          <button class="btn btn-equals" data-key="equals">=</button>
+        </div>
+
+        <!-- Scientific Keyboard Grid -->
+        <div class="keyboard-grid" id="keyboard-scientific">
+          <!-- Row 1 -->
+          <button class="btn btn-sci" data-key="parentheses">( )</button>
+          <button class="btn btn-sci" data-key="pi">π</button>
+          <button class="btn btn-sci" data-key="e">e</button>
+          <button class="btn btn-action" data-key="clear">AC</button>
+          
+          <!-- Row 2 -->
+          <button class="btn btn-sci" data-key="sin">sin</button>
+          <button class="btn btn-sci" data-key="cos">cos</button>
+          <button class="btn btn-sci" data-key="tan">tan</button>
+          <button class="btn btn-action" data-key="backspace"><i class="fa-solid fa-delete-left"></i></button>
+          
+          <!-- Row 3 -->
+          <button class="btn btn-sci" data-key="ln">ln</button>
+          <button class="btn btn-sci" data-key="log">log</button>
+          <button class="btn btn-sci" data-key="sqrt">√</button>
+          <button class="btn btn-operator" data-key="^">xʸ</button>
+          
+          <!-- Row 4 -->
+          <button class="btn btn-sci" data-key="sin-1">sin⁻¹</button>
+          <button class="btn btn-sci" data-key="cos-1">cos⁻¹</button>
+          <button class="btn btn-sci" data-key="tan-1">tan⁻¹</button>
+          <button class="btn btn-operator" data-key="fact">x!</button>
+          
+          <!-- Row 5 -->
+          <button class="btn btn-sci" data-key="deg-rad" id="btn-deg-rad">RAD</button>
+          <button class="btn btn-sci" data-key="abs">|x|</button>
+          <button class="btn btn-num" data-key="ans">Ans</button>
+          <button class="btn btn-equals" data-key="equals">=</button>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- History Drawer Panel -->
+    <aside class="panel-drawer" id="history-drawer">
+      <div class="drawer-header">
+        <h3><i class="fa-solid fa-history"></i> Calculation History</h3>
+        <button class="close-btn" id="close-history"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="drawer-content" id="history-list">
+        <!-- History items dynamically generated -->
+        <div class="empty-history-msg">No history yet</div>
+      </div>
+      <div class="drawer-footer">
+        <button id="clear-history-btn" class="footer-btn danger-btn">
+          <i class="fa-solid fa-trash-can"></i> Clear All History
+        </button>
+      </div>
+    </aside>
+
+    <!-- Theme Selection Drawer Panel -->
+    <aside class="panel-drawer" id="theme-drawer">
+      <div class="drawer-header">
+        <h3><i class="fa-solid fa-palette"></i> Customize Theme</h3>
+        <button class="close-btn" id="close-theme"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="drawer-content themes-list">
+        <button class="theme-option active" data-theme="aurora">
+          <div class="theme-preview aurora-prev"></div>
+          <div class="theme-info">
+            <span class="theme-name">Glass Aurora</span>
+            <span class="theme-desc">Modern glassmorphism with colored gradients</span>
+          </div>
+        </button>
+        
+        <button class="theme-option" data-theme="dark">
+          <div class="theme-preview dark-prev"></div>
+          <div class="theme-info">
+            <span class="theme-name">Sleek Dark</span>
+            <span class="theme-desc">Minimalist, premium charcoal and graphite tones</span>
+          </div>
+        </button>
+        
+        <button class="theme-option" data-theme="light">
+          <div class="theme-preview light-prev"></div>
+          <div class="theme-info">
+            <span class="theme-name">Snow Light</span>
+            <span class="theme-desc">Crisp, clean layout with subtle shadows</span>
+          </div>
+        </button>
+
+        <button class="theme-option" data-theme="synthwave">
+          <div class="theme-preview synth-prev"></div>
+          <div class="theme-info">
+            <span class="theme-name">Retro Synthwave</span>
+            <span class="theme-desc">Vibrant purple neon & hot pink cyberpunk styling</span>
+          </div>
+        </button>
+
+        <button class="theme-option" data-theme="oled">
+          <div class="theme-preview oled-prev"></div>
+          <div class="theme-info">
+            <span class="theme-name">OLED Black</span>
+            <span class="theme-desc">Pure black panels, optimized for contrast & power</span>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Paywall Modal Panel -->
+    <div class="modal-overlay" id="paywall-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="pro-badge"><i class="fa-solid fa-crown"></i> PRO</span>
+          <h2>Upgrade to PRO</h2>
+          <p>Unlock unlimited equations, premium themes, and dynamic audio feedbacks.</p>
+        </div>
+
+        <div class="pro-features">
+          <div class="feature-item">
+            <i class="fa-solid fa-infinity"></i>
+            <span>Unlimited calculations & history entries</span>
+          </div>
+          <div class="feature-item">
+            <i class="fa-solid fa-microscope"></i>
+            <span>Full Scientific & trigonometry commands</span>
+          </div>
+          <div class="feature-item">
+            <i class="fa-solid fa-palette"></i>
+            <span>Access all 5 dynamic premium designer themes</span>
+          </div>
+          <div class="feature-item">
+            <i class="fa-solid fa-wave-square"></i>
+            <span>Organic sound feedback & device haptic effects</span>
+          </div>
+        </div>
+
+        <!-- Payment tabs -->
+        <div class="payment-tabs">
+          <button class="pay-tab active" data-method="card"><i class="fa-solid fa-credit-card"></i> Card</button>
+          <button class="pay-tab" data-method="apple"><i class="fa-brands fa-apple-pay"></i> Apple Pay</button>
+          <button class="pay-tab" data-method="paypal"><i class="fa-brands fa-paypal"></i> PayPal</button>
+        </div>
+
+        <!-- Payment Forms -->
+        <div class="payment-container">
+          <!-- Card Form -->
+          <form class="pay-form active" id="form-card" onsubmit="event.preventDefault();">
+            <div class="form-group">
+              <label for="card-num">Card Number</label>
+              <div class="input-wrapper">
+                <input type="text" id="card-num" placeholder="4111 2222 3333 4444" maxlength="19" required>
+                <i class="fa-solid fa-credit-card input-icon"></i>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="card-expiry">Expiry Date</label>
+                <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" required>
+              </div>
+              <div class="form-group">
+                <label for="card-cvc">CVC</label>
+                <input type="password" id="card-cvc" placeholder="***" maxlength="3" required>
+              </div>
+            </div>
+            <button type="submit" class="pay-submit-btn" id="btn-pay-card">
+              <span>Pay $4.99 & Unlock Lifetime Pro</span>
+            </button>
+          </form>
+
+          <!-- Apple Pay / GPay screen -->
+          <div class="pay-form" id="form-apple">
+            <p class="pay-instructions">Double click side button on your device to pay securely with Face ID / Touch ID.</p>
+            <button class="apple-pay-btn" id="btn-pay-apple">
+              <i class="fa-brands fa-apple-pay"></i> Pay with Apple Pay
+            </button>
+          </div>
+
+          <!-- PayPal screen -->
+          <div class="pay-form" id="form-paypal">
+            <p class="pay-instructions">Press below to log in and pay securely via PayPal.</p>
+            <button class="paypal-btn" id="btn-pay-paypal">
+              <i class="fa-brands fa-paypal"></i> Pay with PayPal
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Success State (hidden initially) -->
+        <div class="payment-success-screen" id="success-screen">
+          <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h3>Payment Successful!</h3>
+          <p>Your account has been upgraded to lifetime PRO. Thank you for your support!</p>
+          <button class="success-close-btn" id="btn-success-close">Start Calculating</button>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- Visual Indicator for mobile touch overlay -->
+    <div class="swipe-hint">Swipe left on display to backspace</div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
